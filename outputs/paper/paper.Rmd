@@ -1,12 +1,10 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
+title: "How Does The Popularity Of An Anime Effect Its Rating"
 author: 
-  - First author
-  - Another author
-thanks: "Code and data are available at: LINK."
+  - Mohid Sharif
+thanks: "Code and data are available at: https://github.com/MohidSharif/Anime-Ratings-Data-Study."
 date: "`r format(Sys.time(), '%d %B %Y')`"
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "Many people on the internet rely on anime ratings on MyAnimeList to determine what to watch next. I obtained data from MyAnimeList, the biggest anime rating site on the web and analysed the effect of popularity, fanbase, number of episodes, and genre on an anime's rating. I found that anime is ranked rather fairly whether that be a large or a small fanbase. My study can be used to show whether ratings from MAL are reliable or if the ratings are biased depending on the popularity of the anime.\\par \\textbf {Keywords:} anime, MyAnimeList, MAL, MAL ratings, manga, anime ratings, anime genre, anime popularity, anime score"
 output:
   bookdown::pdf_document2
 toc: FALSE
@@ -22,56 +20,22 @@ library(palmerpenguins)
 
 # Introduction
 
-You can and should cross-reference sections and sub-sections. For instance, Section \@ref(data). R Markdown automatically makes the sections lower case and adds a dash to spaces to generate labels, for instance, Section \@ref(first-discussion-point). 
+Watching anime has been a hobby of mine since middle school. There are thousands of anime out there and it's not easy finding one that I will enjoy. So it's very important that I have a reliable way to determine which anime I should watch next. My most reliable method is getting recommendations from friends. Most of my favorite anime have been recommended to me by my friends since they are aware of my preferences. My other method is finding anime on MyAnimeList. This method is less reliable, many times I will find an anime that interests me but I don't end up enjoying it. This could be due to false ratings or maybe the story isn't what I had expected it to be. In this paper I wanted to determine whether anime ratings on MAL are accurate and reliable.
+
+I first found a dataset that retrieved information about 17562 different anime and 325772 different users from MAL. After this I cleaned the data to isolate variables that interested me; popularity, episodes, score, genre and members. From here I compared how the popularity, number of episodes and genre of an anime effected it's score. This was done by creating graphs which compared these variables and found any relationships between them. I noticed that anime with less episodes had more popularity and ended up having an overall higher rating. While anime with more episodes had more members in their fan base while having an overall lower rating. However anime were ranked with little bias since users only joined fanbases if they enjoyed the anime thus that anime would have a higher rating and vice versa.
+
+I used my data as a way to determine reliability of user ratings on MAL. I have seen cases where a fan base has collectively tanked an anime's rating as a joke and thus creating false ratings. This way I could determine whether this was a common case on MAL, making the anime ratings unreliable. After my research I have concluded that MAL is in fact a reliable source for information on anime and is a great way to discover new anime.
+
+<!-- You can and should cross-reference sections and sub-sections. For instance, Section \@ref(data). R Markdown automatically makes the sections lower case and adds a dash to spaces to generate labels, for instance, Section \@ref(first-discussion-point).  -->
 
 
 
 # Data
 
-Our data is of penguins (Figure \@ref(fig:bills)).
-
-```{r bills, fig.cap="Bills of penguins", echo = FALSE}
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = FALSE) +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
-```
-
-Talk more about it.
-
-Also bills and their average (Figure \@ref(fig:billssssss)). (Notice how you can change the height and width so they don't take the whole page?)
-
-```{r billssssss, fig.cap="More bills of penguins", echo = FALSE, fig.width=8, fig.height=4}
-
-# This needs to be about the random data tha tI sasmpled?
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = FALSE) +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
-```
-
-Talk way more about it. 
 
 
 
 # Model
-
-\begin{equation}
-Pr(\theta | y) = \frac{Pr(y | \theta) Pr(\theta)}{Pr(y)}  (\#eq:bayes)
-\end{equation}
-
-Equation \@ref(eq:bayes) seems useful, eh?
-
-Here's a dumb example of how to use some references: In paper we run our analysis in `R` [@citeR]. We also use the `tidyverse` which was written by @thereferencecanbewhatever If we were interested in baseball data then @citeLahman could be useful. 
-
-We can use maths by including latex between dollar signs, for instance $\theta$.
-
 
 # Results
 
@@ -79,15 +43,11 @@ We can use maths by including latex between dollar signs, for instance $\theta$.
 
 ## First discussion point
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
-
 ## Second discussion point
 
 ## Third discussion point
 
 ## Weaknesses and next steps
-
-Weaknesses and next steps should also be included.
 
 \newpage
 
