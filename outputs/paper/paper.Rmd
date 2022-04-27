@@ -5,9 +5,12 @@ author:
 thanks: "Code and data are available at: https://github.com/MohidSharif/Anime-Ratings-Data-Study."
 date: "`r format(Sys.time(), '%d %B %Y')`"
 abstract: "Many people on the internet rely on anime ratings on MyAnimeList to determine what to watch next. I obtained data from MyAnimeList, the biggest anime rating site on the web and analysed the effect of popularity, fanbase, number of episodes, and genre on an anime's rating. I found that anime is ranked rather fairly whether that be a large or a small fanbase. My study can be used to show whether ratings from MAL are reliable or if the ratings are biased depending on the popularity of the anime.\\par \\textbf {Keywords:} anime, MyAnimeList, MAL, MAL ratings, manga, anime ratings, anime genre, anime popularity, anime score"
+header-includes:
+ \usepackage{float}
+ \floatplacement{figure}{H}
 output:
   bookdown::pdf_document2
-toc: FALSE
+toc: TRUE
 bibliography: references.bib
 ---
 
@@ -23,27 +26,52 @@ library(kableExtra)
 # Import knitr
 library(knitr)
 library(patchwork)
-library(ggplot2)
-library(dplyr)
-library(broom)
-library(ggpubr)
 ```
+
+\newpage
 
 # Introduction
 
-Watching anime has been a hobby of mine since middle school. There are thousands of anime out there and it's not easy finding one that I will enjoy. So it's very important that I have a reliable way to determine which anime I should watch next. My most reliable method is getting recommendations from friends. Most of my favorite anime have been recommended to me by my friends since they are aware of my preferences. My other method is finding anime on MyAnimeList. This method is less reliable, many times I will find an anime that interests me but I don't end up enjoying it. This could be due to false ratings or maybe the story isn't what I had expected it to be. In this paper I wanted to determine whether anime ratings on MAL are accurate and reliable.
+Watching anime has been a hobby of mine since middle school. There are thousands of anime out there and it's not easy finding one that I will enjoy. This is why it is very important that I have a reliable way to determine which anime I should watch next. My most reliable method is getting recommendations from friends. Most of my favorite anime have been recommended to me by my friends, and since they are aware of my preferences, their recommendations are very reliable. My other method is finding anime on MyAnimeList. This method is a little less reliable, many times I will find an anime that interests me but I don't end up enjoying it. This could be due to false ratings or maybe the story isn't what I had expected it to be from the synopsis. In this paper I want to determine what factors effect scores for anime on MAL, and if anime rankings are reliable.
 
-I first found a dataset that retrieved information about 17562 different anime and 325772 different users from MAL. After this I cleaned the data to isolate variables that interested me; popularity, episodes, score, genre and members. From here I compared how the popularity, number of episodes and genre of an anime effected it's score. This was done by creating graphs which compared these variables and found any relationships between them. I noticed that anime with less episodes had more popularity and ended up having an overall higher rating. While anime with more episodes had more members in their fan base while having an overall lower rating. However anime were ranked with little bias since users only joined fanbases if they enjoyed the anime thus that anime would have a higher rating and vice versa.
+Let's talk about MAL. MAL is the biggest anime database on the web. It contains data about every anime that has been and is currently airing. It contains details such as, airing date, writers, producers, length of anime, episodes, members etc. It also contains data about every user who creates an account and watches anime. It allows for users to add anime to their lists as either, will watch, watching, completed, dropped, or on hold. This information will be very important to us. MAL is structured in a way that the more members an anime has, the greater its popularity, while score isn't necessarily proportional to popularity, however usually it is the case that many popular anime are scored very high. Anime are also categorized by genre, as either TV series or a movie. Now that we are familiar with MAL we can move onto discussing the procedure.
 
-I used my data as a way to determine reliability of user ratings on MAL. I have seen cases where a fan base has collectively tanked an anime's rating as a joke and thus creating false ratings. This way I could determine whether this was a common case on MAL, making the anime ratings unreliable. After my research I have concluded that MAL is in fact a reliable source for information on anime and is a great way to discover new anime.
+I first found a dataset that retrieved information about 17562 different anime and 325772 different users from MAL. After this I downloaded and cleaned the data to isolate variables that interested me; popularity, episodes, score, genre, completed, dropped and members. I created a model that determined the predictability of the score on an anime depending on its popularity. MAL determines an anime's popularity by how many members have added the anime to their list. This in turn affects the score of the anime due to members being more likely to leave a review. From here I wanted to compare the popularity, number of episodes and group size of an anime with score and see how they relate to eachother. This was done by creating plots which compared these variables and found any relationships between them. I noticed that anime with less episodes had more popularity and ended up having an overall higher rating. While anime with more episodes had more members in their fan base while having an overall lower rating. However anime were ranked with little bias since users only joined fanbases if they enjoyed the anime thus that anime would have a higher rating and vice versa.
+
+I used my data as a way to determine reliability of user ratings on MAL. I have seen cases where a fan base has collectively tanked an anime's rating as a joke and thus creating false ratings. This way I could determine whether this was a common case on MAL, making the anime ratings unreliable. I also used my data to determine if users were more likely to complete watching an anime if it had a higher score and if they were more likely to drop and anime if it had a large number of episodes. I found that users were more likely to complete an anime if it had a higher score and more likely to drop an anime if it had ~200 episodes.
 
 <!-- You can and should cross-reference sections and sub-sections. For instance, Section \@ref(data). R Markdown automatically makes the sections lower case and adds a dash to spaces to generate labels, for instance, Section \@ref(first-discussion-point).  -->
 
-
+\newpage
 
 # Data
 
-```{r dataextract, echo= FALSE}
+I obtained my data from *Hernan4444*'s github repository titled *MyAnimeList-Database* [@MAL], this user was able to extract data from the website *myanimelist.com* and create a CSV file which I will be using for this paper. I used the statistical programming language **R** [@citeR] as the workspace for my entire paper. On R I used the **tidyverse** package for data manipulation [@citetidyverse] and **kableExtra**, which allows for table formatting [@citekableExtra]. The header includes two lines of code **"usepackage{float}"** which allow the use of float in our R markdown and the line **"floatplacement{figure}{H}"** [@citeholdposition] which keeps the tables and figures locked in the specific place where they are written in R markdown.
+
+The dataset I retrieved is rather large and contains very detailed information about anime on MAL. Lets go through the information we have available in this dataset and how we can use it for this paper. Firstly, there are 35 different classifications for each anime. Though this is very thorough, we won't require all of them. The ones we will require are:
+
+* MAL ID: This is the unique ID that is associated with each anime (e.g. 34)
+* English Name: This is the English name of the specific anime (e.g. Cowboy Bebop)
+* Score: This is the average score an anime has achieved through user reviews, users are able to score anime from 1-10 (e.g 7.8)
+* Type: This tells us if an anime is a TV series or a movie (e.g. TV)
+* Episodes: This tells us how many episodes an anime currently has (e.g. 25)
+* Rank: This is the rank an anime has achieved due to it's score compared to other anime's scores (e.g. 3)
+* Popularity: This is a ranking that is determined by how many users have added this anime to their list, it's important to remember that a lower popularity rating means the anime is more popular (e.g. 19 popularity is better than 25)
+* Members: This is the number of users who have added a specific anime to their list (e.g. 20093)
+* Completed: The number of users who have completed watching all available episodes of an anime
+* Dropped: The number of useres who have decided to drop/stop watching an anime (e.g. 19847)
+
+Many of these numerical values were initially classified as characters. I was able to clean the data and cast these values as numerics for ease of use. The values that will be most important to us are score, episodes, popularity, members, completed, and dropped. We can go through each of these variables and determine how they effect the score of an anime, and what this tells us about MAL's review system.
+
+Here are a few questions that I want to answer in this paper:
+
+* How does score differ when we look at small, medium, and large runtime anime?
+* Does the score effect if people are completing an anime or not?
+* Does the length of an anime effect its drop rate (larger are more intimidating, thus have higher drops)?
+
+(Table \@ref(tab:sampledata)) Is the summary of the cleaned data we obtained from MAL. Note that many unnecessary variables are not present here and the data has been cleaned so that no values such as "Unknown" are present here.
+
+```{r sampledata, echo= FALSE}
 anime_data <- read.csv("/cloud/project/anime-data-study/Anime-Ratings-Data-Study/inputs/data/anime_data.csv")
 
 # Filter the data to be specific to Agincourt North neighborhoods and to exclude source of infections that contain "No Information" or "Pending"
@@ -62,119 +90,231 @@ anime_data |>
     kable_styling(latex_options = "HOLD_position")
 ```
 
-
-
 # Model
 
-```{r}
+## Simple Linear Regression
 
-hist(anime_data$Score)
+To determine if a relationship exists between score and popularity, we can do a regression to simulate the expected values of score. Since we want to see the relationship between two variables, we can use a linear regression model. We can characterize the linear relationship between our two variables as:
+
+$$Y = \beta b_{0} + \beta b_{1}X + \epsilon$$
+In this model $X$ denotes the popularity of each anime and $Y$ denotes the score. $\beta{0}$ represents the predicted value of Y when X is 0 and $\beta{0}$ are the expected change to Y when $X$ increases.
+
+## Simulating The Data
+
+We can create a model to simulate the regression of our two variables. First thing we need to do is determine how similar our data for score is to a Normal distribution.
+
+(Figure \@ref(fig:normcheck)) Shows the distribution of our score data on a histogram.
+
+```{r normcheck, fig.cap= "Normal Distribution Check On Score", echo=FALSE}
+anime_data |> 
+  ggplot(mapping = aes(x = Score)) +
+  geom_histogram(bins=30)+
+  theme_minimal()+
+  labs(x = "Score",
+       y = "Count",
+       caption = "Distribution Graph Of Score")
+```
+
+Notice here that our distribution does indeed resemble a normal distribution. From here we can model the relationship between our variables score and popularity. Once we have our model we can start simulating the regression and observe the change in our two variables in relation to eachother.
+
+(Figure \@ref(fig:simulation)) shows the simulation of our regression made from our model dataset. 
+
+```{r simulation, fig.cap="Simulation Of Our Regression", echo=FALSE}
+
+library(broom)
 
 model_data <- 
   anime_data |>
   filter(Score != "Unknown", Popularity != "Unknown", Type == "TV")
 
-income.happiness.lm <- lm(Popularity ~ Score, data = model_data)
+anime_data.lm <- lm(Popularity ~ Score, data = model_data)
 
-summary(income.happiness.lm)
+model_data <- 
+  augment(anime_data.lm,
+          data = model_data)
 
-income.graph<-ggplot(model_data, aes(x=Score, y=Popularity))+
-                     geom_point()+
-                     geom_smooth()+
-                     stat_regline_equation(label.x = 3, label.y = 7)
-income.graph
+gr1 <- 
+  ggplot(model_data, 
+       aes(x = .resid)) + 
+  geom_histogram(binwidth = 1) +
+  theme_classic() +
+  labs(y = "Number of occurrences",
+       x = "Residuals",
+       caption = "Residual Distribution")
+
+gr2 <- 
+  ggplot(model_data, 
+       aes(x = Popularity, y = .resid)) + 
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dotted", color = "grey") +
+  theme_classic() +
+  labs(y = "Residuals",
+       x = "Popularity",
+       caption = "Popularity Residuals")
+
+gr3 <- 
+  ggplot(model_data, 
+       aes(x = Score, .fitted)) + 
+  geom_point() +
+  theme_classic() +
+  labs(y = "Estimated Score",
+       x = "Actual Score",
+       caption = "Score Residuals")
+
+gr4 <- 
+  model_data |> 
+  ggplot(aes(x = Score, y = Popularity)) +
+  geom_point() + 
+  geom_smooth(method = "lm", 
+              se = TRUE, 
+              color = "black", 
+              linetype = "dashed",
+              formula = 'y ~ x') +
+  labs(x = "Score",
+       y = "Popularity",
+       caption = "Simulated Regression Data On Score And Popularity") +
+  theme_classic()
+
+(gr1+gr2)/
+  (gr3+gr4)
+
 ```
 
 
 # Results
 
-```{r score-and-popularity, fig.cap="Relationship between Score and Popularity Categorized By Length of Anime", echo = FALSE}
+Let's observe our findings now by creating some meaningful plots. Our first few plots are going to show us the relationship between score and popularity depending on the length of anime. Here we can categorize our data to create 4 different plots to better see the effect length of an anime has on our score. Our first plot will focus on anime with less than 25 episodes, this will be denoted as anime with "One Season", our next graph will plot data corresponding to anime with 25-50 episodes, this will be denoted as anime with "Two seasons", our third graph will plot data from 50-100 episodes, this will be denoted by "Three Seasons", and finally our last graph will plot our data for anime with greater than 100 episodes, this will be classified as "Four Seasons+".
+
+The reason we divide our data into groups by anime length is to reduce the density of our plots. Our dataset contains a very large number of data that would otherwise be very overwhelming to the reader. Even after dividing our dataset our graphs will still be very dense. Diving our dataset also has other benefits, such as seeing how length of an anime effects the score of an anime. We can do this by comparing our 4 different plots to observe any differences in score and popularity that occur when anime length is small or large.
+
+Remember here that our data indicates an increase in popularity with smaller numbers, higher popularity is associated with a lower popularity ranking. A negative relationship between our variables on our graph would indicate an increase in score when popularity is higher.
+
+(Figure \@ref(fig:scoreandpopularity)) Shows the relationship between popularity and score, depending on anime length.
+
+```{r scoreandpopularity, echo=FALSE, fig.cap="Relationship between Score and Popularity Categorized By Length of Anime"}
 
 one_season <-
  anime_data |>
   filter(Score != "Unknown", Popularity != "Unknown", Type == "TV", Episodes <= 25) |>
-  ggplot(mapping = aes(x = Score, y = Popularity)) +
+  ggplot(mapping = aes(x = Popularity, y = Score)) +
   geom_jitter(color = "lightblue") +
   geom_smooth() +
   theme_minimal()+
-  labs(x = "Score",
-       y = "Popularity",
+  labs(x = "Popularity Ranking",
+       y = "Score",
        title = "Relationship between Score and Popularity",
        caption = "Anime With One Seasons")
 
 two_season <-
  anime_data |>
   filter(Score != "Unknown", Popularity != "Unknown", Type == "TV", Episodes>25 & Episodes<=50) |>
-  ggplot(mapping = aes(x = Score, y = Popularity)) +
+  ggplot(mapping = aes(x = Popularity, y = Score)) +
   geom_jitter(color = "lightblue") +
   geom_smooth() +
   theme_minimal()+
-  labs(x = "Score",
-       y = "Popularity",
+  labs(x = "Popularity Ranking",
+       y = "Score",
        caption = "Anime With Two Seasons")
 
 three_season <-
  anime_data |>
   filter(Score != "Unknown", Popularity != "Unknown", Type == "TV", Episodes>50 & Episodes<=100) |>
-  ggplot(mapping = aes(x = Score, y = Popularity)) +
+  ggplot(mapping = aes(x = Popularity, y = Score)) +
   geom_jitter(color = "lightblue") +
   geom_smooth() +
   theme_minimal()+
-  labs(x = "Score",
-       y = "Popularity",
+  labs(x = "Popularity Ranking",
+       y = "Score",
        caption = "Anime With Three Seasons")
 
 four_season <-
  anime_data |>
   filter(Score != "Unknown", Popularity != "Unknown", Type == "TV", Episodes > 100) |>
-  ggplot(mapping = aes(x = Score, y = Popularity)) +
+  ggplot(mapping = aes(x = Popularity, y = Score)) +
   geom_jitter(color = "lightblue") +
   geom_smooth() +
   theme_minimal()+
-  labs(x = "Score",
-       y = "Popularity",
+  labs(x = "Popularity Ranking",
+       y = "Score",
        caption = "Anime With Four Seasons+")
 
 (one_season+two_season)/(three_season+four_season)
 ```
 
+There are many meaningful observations here. Lets start with our first graph. We can see that our plot is much more dense towards the left side of the graph when our popularity ranking is lower. This indicates an increase in score when popularity ranking is lower (higher popularity). We can also see that score increases much faster from popularity rankings 1000 and lower since anime in this popularity are scored very highly. Other than the first 1000 popularity rankings the graph indicates a consistent horizontal relationship between popularity ranking and score. This tells us that regardless of popularity ranking anime is ranked consistently across the board when we look at anime with less than 25 episodes.
 
-```{r completed-and-members, fig.cap="Effect Of Dropping An Anime On Score", echo = FALSE}
+For our second graph our observations are almost the same. The only difference from our first graph is the steady decrease in score as anime popularity ranking increases. For anime with 25 to 50 episodes we see a greater decrease in score as popularity decreases. This seems to also be true for our last two graphs. They show a much more decreasing linear relationship between score and popularity. As popularity ranking increases our score seems to decrease steadily. Though we can notice in our third plot that our graph is more densely populated around 5000-10000 popularity rankings. This tells us that anime that have approximately 3 seasons are more scarce in popularity rankings below 5000. Conversely our last plot is densely populated on its endpoints. Indicating that users seem to rank long running anime either higher or lower most often.
+
+Now let's make a few more meaningful plots to answer the rest of our questions. The next plot I want to make is to observe the relationship between completion and score. I want to use this plot to answer my question of if users are more likely to finish an anime with a greater score. 
+
+The last plot we will make is to measure the relationship between dropped anime and episodes. This will answer our question: Does the length of an anime effect its drop rate (larger are more intimidating, thus have higher drops)?
+
+(Figure \@ref(fig:completedandscore)) Shows the relationship between score and the completion of an anime by users.
+
+```{r completedandscore, fig.cap="Effect Of Score On The Completion Of Anime", echo = FALSE,  out.height="80%", out.width="80%"}
 
 anime_data |>
-  filter(Completed != "Unknown", Popularity != "Unknown", Type == "TV") |>
-  ggplot(mapping = aes(x = Score, y = Dropped)) +
+  filter(Completed != "Unknown", Popularity != "Unknown", Type == "TV", Completed <= 100000) |>
+  ggplot(mapping = aes(x = Score, y = Completed)) +
   geom_jitter(color = "lightblue") +
   geom_smooth() +
   theme_minimal()+
   labs(x = "Score",
-       y = "Dropped",
-       title = "Anime Dropping VS Score")
+       y = "Completed",
+       title = "Anime Completed VS Score")
 
 ```
 
-```{r dropped-and-episodes, fig.cap="Anime Relationship between Dropped And Episodes", echo = FALSE}
+(Figure \@ref(fig:droppedandepisodes)) Shows us if anime is more likely to be dropped if it contains more episodes.
+
+```{r droppedandepisodes, echo=FALSE, fig.cap="Anime Relationship between Dropped And Episodes", out.height="80%", out.width="80%"}
 
 anime_data |>
-  filter(Dropped != "Unknown", Completed != "Unknown", Popularity != "Unknown", Type == "TV", Episodes < 1000) |>
+  filter(Type == "TV", Episodes <= 500) |>
   ggplot(mapping = aes(x = Episodes, y = Dropped)) +
-  geom_point(color = "lightblue") +
+  geom_jitter(color = "lightblue") +
+  geom_smooth()+
   theme_minimal()+
   labs(x = "Episodes",
        y = "Dropped",
-       title = "Dropping Of Anime By Anime Length")
+       title = "Dropping Of Anime By Anime Length",
+       caption = "")
 
 ```
 
 # Discussion
 
-## First discussion point
+## Motivation
 
-## Second discussion point
+In this paper I wanted to study about data obtained from MAL. My aim was to answer a few questions that interested me. MAL has been my go to place for any and all information for anime. I thought it would be interesting to see which variables effect the scoring system on MAL and if I can get a better understanding of user behavior on the site.
 
-## Third discussion point
+MAL is a vast database of valuable information on all kinds of anime. It is important that we understand the data and how it effects anime rankings and user recommendations. MAL critiques its anime by allowing users to score each anime they have watched from 1-10, this determines an anime's overall score, and the score directly impacts it's global ranking against other anime. An anime's popularity is determined by the number of people who interact with it, being a member means the user is either watching the anime, completed the anime, or plans to watch it in the future.
+
+Knowing this information I wanted to see how these classifications effected each other. If there is direct correlation, how does it impact the other variable? If there is no relation between variables then how do they help in classifying anime. We could even use this data to model expected results such as the expected outcome of score for an anime depending on its popularity, or how likely is a user to complete or drop an anime depending on the popularity or score of the anime.
+
+## Answers
+
+So did my questions get answered? Well lets answer them now from the observations we have made in this paper.
+
+How does score differ when we look at small, medium, and large run time anime?
+
+Our model shows us that score stays consistent throughout small, medium, and large runtime anime. While smaller anime seem to be more densely plotted showing a higher interest and overall popularity. This makes sense, people including me often opt to watch smaller anime to not be commited to something that we don't have enough time for. Medium anime seem to be the most consistent in its popularity distribution. The score increases steadily as the popularity of anime increases. Larger anime are the least densely populated showing a smaller interest and overall popularity for them. This also makes sense, it's much easier to find a smaller anime to watch which requires less commitment. Larger anime are also more dense on their end points, meaning that larger anime are more commonly scored very high or low, while being scarce in between.
+
+Does the score effect if people are completing an anime or not?
+
+What surprised me about this finding was not the pattern which we observed but rather the magnitude of the effect that score has on the completion of an anime. Our data showed us that anime that is scored greater than 6 has a drastically higher chance of being completed than anime with lower score. This is with a spread out denseness through the plot. What does this mean? Are people more inclined to complete an anime if it has a higher score? Is the higher score due to the fact that more people are completing the anime? These are a few questions we can maybe answer in the future but it is certainly intriguing to think about.
+
+Does the length of an anime effect its drop rate (larger are more intimidating, thus have higher drops)?
+
+Our data showed us a rather weak relationship between our variables. While there were hints of cases where this was true, we cannot make any claims on this matter. Some things we do however notice are: an increase in drop rate in anime with greater than 25, 150, and 400 episodes. After which lengths of anime become absurd which makes it harder to make any meaningful conclusions. 
+
+\newpage
 
 ## Weaknesses and next steps
+
+Some of the weaknesses with this data is the lack of update from users. Personally I do not spend the time and effort to change my status on an anime from "watching" to "completed", it's simply a hassle for me. This is true for many users and gives us error margins in our data that need to be accounted for. However it does help that our dataset is very large and many of these cases can be diminished. Having anime with episodes of 1000+ makes it difficult to make conclusions on their patterns because they are extreme outliers. The last issue with our data is the difference between density in lengths of anime. There is a very large number of anime with smaller lengths that skews the data, and density decreases substantially once we cross the 500 and 1000 episode anime mark. This made it hard to determine if people were dropping anime due to the length of an anime or just out of disinterest.
+
+Our next steps should be to answer more questions using this dataset. The more questions we answer the better our understanding is of how users are interacting with anime and how we can improve recommendations. A few future questions could include: Which genre's have a higher complete rate? drop rate? Which studios are linked to higher popularity? score? What do users look at to determine which anime to watch next? Do anime recommendations work?
 
 \newpage
 
@@ -183,12 +323,141 @@ anime_data |>
 # Appendix {-}
 
 
-# Additional details
+# Datasheet
 
+**Motivation**
+
+1. *For what purpose was the dataset created? Was there a specific task in mind? Was there a specific gap that needed to be filled? Please provide a description.*
+    - The dataset was created for the pupose of creating a better recommendation system.
+2. *Who created the dataset (for example, which team, research group) and on behalf of which entity (for example, company, institution, organization)?*
+    - The dataset is extracted from MyAnimeList by the github user *Hernan4444* on behalf of an organization for reseach purposes.
+3. *Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor and the grant name and number.*
+    - The datset was created by collecting data on MAL so no funding was required.
+4. *Any other comments?*
+    - None
+
+**Composition**
+
+1. *What do the instances that comprise the dataset represent (for example, documents, photos, people, countries)? Are there multiple types of instances (for example, movies, users, and ratings; people and interactions between them; nodes and edges)? Please provide a description.*
+	- The instances indicate the classifications of anime and users. The dataset shows the relationship between users and anime, classifying anime by score, popularity, ranking, members and etc.
+2. *How many instances are there in total (of each type, if appropriate)?*
+	- There are 17,562 instances
+3. *Does the dataset contain all possible instances or is it a sample (not necessarily random) of instances from a larger set? If the dataset is a sample, then what is the larger set? Is the sample representative of the larger set (for example, geographic coverage)? If so, please describe how this representativeness was validated/verified. If it is not representative of the larger set, please describe why not (for example, to cover a more diverse range of instances, because instances were withheld or unavailable).*
+	- The dataset does contain all possible instances.
+4. *What data does each instance consist of? "Raw" data (for example, unprocessed text or images) or features? In either case, please provide a description.*
+	- Each instance consists of 35 values which indicate the classification of every anime.
+5. *Is there a label or target associated with each instance? If so, please provide a description.*
+	- Instances are labeled as ID which correspond to unique anime on MAL
+6. *Is any information missing from individual instances? If so, please provide a description, explaining why this information is missing (for example, because it was unavailable). This does not include intentionally removed information, but might include, for example, redacted text.*
+	- There is information labeled as "Unknown" in the completed column, this information is missing because the anime is ongoing and not yet completed.
+7. *Are relationships between individual instances made explicit (for example, users' movie ratings, social network links)? If so, please describe how these relationships are made explicit.*
+	- Some instances such as score, watching, completed and dropped are made explicit, indicating the direct relationship from users with anime.
+8. *Are there recommended data splits (for example, training, development/validation, testing)? If so, please provide a description of these splits, explaining the rationale behind them.*
+	- There are no recommended data splits.
+9. *Are there any errors, sources of noise, or redundancies in the dataset? If so, please provide a description.*
+	- There are no errors, sources of noise, or redundancies in the dataset.
+10. *Is the dataset self-contained, or does it link to or otherwise rely on external resources (for example, websites, tweets, other datasets)? If it links to or relies on external resources, a) are there guarantees that they will exist, and remain constant, over time; b) are there official archival versions of the complete dataset (that is, including the external resources as they existed at the time the dataset was created); c) are there any restrictions (for example, licenses, fees) associated with any of the external resources that might apply to a dataset consumer? Please provide descriptions of all external resources and any restrictions associated with them, as well as links or other access points, as appropriate.*
+	- The dataset is self-contained.
+11. *Does the dataset contain data that might be considered confidential (for example, data that is protected by legal privilege or by doctor-patient confidentiality, data that includes the content of individuals' non-public communications)? If so, please provide a description.*
+	- There is no confidential data, and the dataset is publicly available.
+12. *Does the dataset contain data that, if viewed directly, might be offensive, insulting, threatening, or might otherwise cause anxiety? If so, please describe why.*
+	- The data does contain information on adult anime (Hentai). Is not recommended for younger persons.
+13. *Does the dataset identify any sub-populations (for example, by age, gender)? If so, please describe how these subpopulations are identified and provide a description of their respective distributions within the dataset.*
+	- The dataset does not identify any sub-populations
+14. *Is it possible to identify individuals (that is, one or more natural persons), either directly or indirectly (that is, in combination with other data) from the dataset? If so, please describe how.*
+	- It is not possible to identify individuals in any way.
+15. *Does the dataset contain data that might be considered sensitive in any way (for example, data that reveals race or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)? If so, please provide a description.*
+	- None.
+16. *Any other comments?*
+	- None.
+
+**Collection process**
+
+1. *How was the data associated with each instance acquired? Was the data directly observable (for example, raw text, movie ratings), reported by subjects (for example, survey responses), or indirectly inferred/derived from other data (for example, part-of-speech tags, model-based guesses for age or language)? If the data was reported by subjects or indirectly inferred/derived from other data, was the data validated/verified? If so, please describe how.*
+	- The data associated was collected with the permission from MAL and extracted from their database into seperate csv files, for users and anime. The data is collected from the interaction of users on the MAL website.
+2. *What mechanisms or procedures were used to collect the data (for example, hardware apparatuses or sensors, manual human curation, software programs, software APIs)? How were these mechanisms or procedures validated?*
+	- Software programs/APIs
+3. *If the dataset is a sample from a larger set, what was the sampling strategy (for example, deterministic, probabilistic with specific sampling probabilities)?*
+	- The dataset is a sample from a larger set which also contains specific user data.
+4. *Who was involved in the data collection process (for example, students, crowdworkers, contractors) and how were they compensated (for example, how much were crowdworkers paid)?*
+	- MAL is the holder and collector of this data.
+5. *Over what timeframe was the data collected? Does this timeframe match the creation timeframe of the data associated with the instances (for example, recent crawl of old news articles)? If not, please describe the timeframe in which the data associated with the instances was created.*
+	- The data is collected from all years prior to and including 2020 since MAL has been in operation.
+6. *Were any ethical review processes conducted (for example, by an institutional review board)? If so, please provide a description of these review processes, including the outcomes, as well as a link or other access point to any supporting documentation.*
+	- Ethical review processes were not conducted.
+7. *Did you collect the data from the individuals in question directly, or obtain it via third parties or other sources (for example, websites)?*
+	- Data was extracted from MAL: myanimelist.com. And downloaded from: https://github.com/Hernan4444/MyAnimeList-Database
+8. *Were the individuals in question notified about the data collection? If so, please describe (or show with screenshots or other information) how notice was provided, and provide a link or other access point to, or otherwise reproduce, the exact language of the notification itself.*
+	- Users are aware that their interaction on the website is stored in the MAL database and can be used to conduct research and observations.
+9. *Did the individuals in question consent to the collection and use of their data? If so, please describe (or show with screenshots or other information) how consent was requested and provided, and provide a link or other access point to, or otherwise reproduce, the exact language to which the individuals consented.*
+	- The individuals consented to the collection and use of their data by use of the website.
+10. *If consent was obtained, were the consenting individuals provided with a mechanism to revoke their consent in the future or for certain uses? If so, please provide a description, as well as a link or other access point to the mechanism (if appropriate).*
+	- A mechanism to revoke consent was not provided.
+11. *Has an analysis of the potential impact of the dataset and its use on data subjects (for example, a data protection impact analysis) been conducted? If so, please provide a description of this analysis, including the outcomes, as well as a link or other access point to any supporting documentation.*
+	- An analysis of the potential impact of the dataset and its use on data subjects was not conducted.
+12. *Any other comments?*
+	- None
+
+**Preprocessing/cleaning/labeling**
+
+1. *Was any preprocessing/cleaning/labeling of the data done (for example, discretization or bucketing, tokenization, part-of-speech tagging, SIFT feature extraction, removal of instances, processing of missing values)? If so, please provide a description. If not, you may skip the remaining questions in this section.*
+	- The data was originally obtained in CSV file which was downloaded and cleaned and turned into a more usable dataset.
+2. *Was the "raw" data saved in addition to the preprocessed/cleaned/labeled data (for example, to support unanticipated future uses)? If so, please provide a link or other access point to the "raw" data.*
+	- There is no raw data, though the original data is contained at: https://github.com/Hernan4444/MyAnimeList-Database
+3. *Is the software that was used to preprocess/clean/label the data available? If so, please provide a link or other access point.*
+	- R Software is avalaible at https://www.R-project.org/
+4. *Any other comments?*
+	- None
+
+**Uses**
+
+1. *Has the dataset been used for any tasks already? If so, please provide a description.*
+	- It has been used to create a better anime recommendations system on MAL.
+2. *Is there a repository that links to any or all papers or systems that use the dataset? If so, please provide a link or other access point.*
+	- https://github.com/MohidSharif/Anime-Ratings-Data-Study
+3. *What (other) tasks could the dataset be used for?*
+	- The dataset can be used to observe statistics associated with every unique anime.
+4. *Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? For example, is there anything that a dataset consumer might need to know to avoid uses that could result in unfair treatment of individuals or groups (for example, stereotyping, quality of service issues) or other risks or harms (for example, legal risks, financial harms)? If so, please provide a description. Is there anything a dataset consumer could do to mitigate these risks or harms?*
+	- None
+5. *Are there tasks for which the dataset should not be used? If so, please provide a description.*
+	- None
+
+**Distribution**
+
+1. *Will the dataset be distributed to third parties outside of the entity (for example, company, institution, organization) on behalf of which the dataset was created? If so, please provide a description.*
+	- Unsure.
+2. *How will the dataset be distributed (for example, tarball on website, API, GitHub)? Does the dataset have a digital object identifier (DOI)?*
+	- The dataset will be distributed using Github.
+3. *When will the dataset be distributed?*
+	- The dataset will be distributed in April 2022.
+4. *Will the dataset be distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use (ToU)? If so, please describe this license and/ or ToU, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms or ToU, as well as any fees associated with these restrictions.*
+	- The dataset will be released under the MIT license
+5. *Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms, as well as any fees associated with these restrictions.*
+	- There are no restrictions
+6. *Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any supporting documentation.*
+	- No such controls or restrictions are applicable.
+7. *Any other comments?*
+
+**Maintenance**
+
+1. *Who will be supporting/hosting/maintaining the dataset?*
+	- Mohid Sharif
+2. *How can the owner/curator/manager of the dataset be contacted (for example, email address)?*
+	- Can be contacted via github
+3. *Is there an erratum? If so, please provide a link or other access point.*
+	- There is no erratum available currently.
+4. *Will the dataset be updated (for example, to correct labeling errors, add new instances, delete instances)? If so, please describe how often, by whom, and how updates will be communicated to dataset consumers (for example, mailing list, GitHub)?*
+	- Currently there is no plan of updating the dataset.
+5. *If the dataset relates to people, are there applicable limits on the retention of the data associated with the instances (for example, were the individuals in question told that their data would be retained for a fixed period of time and then deleted)? If so, please describe these limits and explain how they will be enforced.*
+	- There are no applicable limits as the data is collected from willing users.
+6. *Will older versions of the dataset continue to be supported/hosted/maintained? If so, please describe how. If not, please describe how its obsolescence will be communicated to dataset consumers.*
+	- The older versions would not be hosted. Data may be updated which can be checked through the commit history on github.
+7. *If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? If so, please provide a description. Will these contributions be validated/verified? If so, please describe how. If not, why not? Is there a process for communicating/distributing these contributions to dataset consumers? If so, please provide a description.*
+	- There is no way currently for people to contribute on the dataset
 
 \newpage
 
 
 # References
 
-
+@citeggplot2
