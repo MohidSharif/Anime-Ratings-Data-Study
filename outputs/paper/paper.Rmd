@@ -1,5 +1,5 @@
 ---
-title: "How Does The Popularity Of An Anime Effect Its Rating"
+title: "Are MAL Ratings Reliable"
 author: 
   - Mohid Sharif
 thanks: "Code and data are available at: https://github.com/MohidSharif/Anime-Ratings-Data-Study."
@@ -11,11 +11,22 @@ toc: FALSE
 bibliography: references.bib
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 
+```{r setup, include=FALSE}
+# Turn off echo for all code, disables knitting code chunks
+knitr::opts_chunk$set(echo = TRUE)
+# Turn off warning messaging in knitten paper file
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+# Import needed librarys
 library(tidyverse)
-library(palmerpenguins)
+library(kableExtra)
+# Import knitr
+library(knitr)
+library(patchwork)
+library(ggplot2)
+library(dplyr)
+library(broom)
+library(ggpubr)
 ```
 
 # Introduction
@@ -32,12 +43,128 @@ I used my data as a way to determine reliability of user ratings on MAL. I have 
 
 # Data
 
+```{r dataextract, echo= FALSE}
+anime_data <- read.csv("/cloud/project/anime-data-study/Anime-Ratings-Data-Study/inputs/data/anime_data.csv")
+
+# Filter the data to be specific to Agincourt North neighborhoods and to exclude source of infections that contain "No Information" or "Pending"
+anime_data |> 
+  filter(English.name != "Unknown", Episodes != "Unknown") |>
+  select(MAL_ID, English.name, Score, Type, Episodes, Ranked, Popularity, Members, Completed) |>
+# Include 10 listings in the table
+  slice(1:10) |> 
+# Display the table with a caption and appropriate column names and format properties
+  kable(
+    caption = "Sample Data From Our MAL Dataset",
+    col.names = c("ID", "English Name", "Score", "Type", "Episodes", "Ranked", "Popularity", "Members", "Completed"),
+    digits = 1,
+    booktabs = TRUE,
+    linesep = "") |> 
+    kable_styling(latex_options = "HOLD_position")
+```
 
 
 
 # Model
 
+```{r}
+
+hist(anime_data$Score)
+
+model_data <- 
+  anime_data |>
+  filter(Score != "Unknown", Popularity != "Unknown", Type == "TV")
+
+income.happiness.lm <- lm(Popularity ~ Score, data = model_data)
+
+summary(income.happiness.lm)
+
+income.graph<-ggplot(model_data, aes(x=Score, y=Popularity))+
+                     geom_point()+
+                     geom_smooth()+
+                     stat_regline_equation(label.x = 3, label.y = 7)
+income.graph
+```
+
+
 # Results
+
+```{r score-and-popularity, fig.cap="Relationship between Score and Popularity Categorized By Length of Anime", echo = FALSE}
+
+one_season <-
+ anime_data |>
+  filter(Score != "Unknown", Popularity != "Unknown", Type == "TV", Episodes <= 25) |>
+  ggplot(mapping = aes(x = Score, y = Popularity)) +
+  geom_jitter(color = "lightblue") +
+  geom_smooth() +
+  theme_minimal()+
+  labs(x = "Score",
+       y = "Popularity",
+       title = "Relationship between Score and Popularity",
+       caption = "Anime With One Seasons")
+
+two_season <-
+ anime_data |>
+  filter(Score != "Unknown", Popularity != "Unknown", Type == "TV", Episodes>25 & Episodes<=50) |>
+  ggplot(mapping = aes(x = Score, y = Popularity)) +
+  geom_jitter(color = "lightblue") +
+  geom_smooth() +
+  theme_minimal()+
+  labs(x = "Score",
+       y = "Popularity",
+       caption = "Anime With Two Seasons")
+
+three_season <-
+ anime_data |>
+  filter(Score != "Unknown", Popularity != "Unknown", Type == "TV", Episodes>50 & Episodes<=100) |>
+  ggplot(mapping = aes(x = Score, y = Popularity)) +
+  geom_jitter(color = "lightblue") +
+  geom_smooth() +
+  theme_minimal()+
+  labs(x = "Score",
+       y = "Popularity",
+       caption = "Anime With Three Seasons")
+
+four_season <-
+ anime_data |>
+  filter(Score != "Unknown", Popularity != "Unknown", Type == "TV", Episodes > 100) |>
+  ggplot(mapping = aes(x = Score, y = Popularity)) +
+  geom_jitter(color = "lightblue") +
+  geom_smooth() +
+  theme_minimal()+
+  labs(x = "Score",
+       y = "Popularity",
+       caption = "Anime With Four Seasons+")
+
+(one_season+two_season)/(three_season+four_season)
+```
+
+
+```{r completed-and-members, fig.cap="Effect Of Dropping An Anime On Score", echo = FALSE}
+
+anime_data |>
+  filter(Completed != "Unknown", Popularity != "Unknown", Type == "TV") |>
+  ggplot(mapping = aes(x = Score, y = Dropped)) +
+  geom_jitter(color = "lightblue") +
+  geom_smooth() +
+  theme_minimal()+
+  labs(x = "Score",
+       y = "Dropped",
+       title = "Anime Dropping VS Score")
+
+```
+
+```{r dropped-and-episodes, fig.cap="Anime Relationship between Dropped And Episodes", echo = FALSE}
+
+anime_data |>
+  filter(Dropped != "Unknown", Completed != "Unknown", Popularity != "Unknown", Type == "TV", Episodes < 1000) |>
+  ggplot(mapping = aes(x = Episodes, y = Dropped)) +
+  geom_point(color = "lightblue") +
+  theme_minimal()+
+  labs(x = "Episodes",
+       y = "Dropped",
+       title = "Dropping Of Anime By Anime Length")
+
+```
 
 # Discussion
 
