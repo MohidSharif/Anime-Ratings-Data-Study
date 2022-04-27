@@ -1,5 +1,5 @@
 ---
-title: "Are MAL Ratings Reliable"
+title: "What Effects Anime Scores On MAL"
 author: 
   - Mohid Sharif
 thanks: "Code and data are available at: https://github.com/MohidSharif/Anime-Ratings-Data-Study."
